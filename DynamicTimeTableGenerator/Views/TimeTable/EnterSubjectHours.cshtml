@@ -1,0 +1,85 @@
+﻿@model DynamicTimeTableGenerator.Model.TimeTable.TimeTableModel
+
+@{
+    ViewData["Title"] = "Enter Subject Hours";
+}
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center text-primary mb-4">Enter Hours for Each Subject</h2>
+
+        <form id="subjectHoursForm" asp-action="EnterSubjectHours" method="post">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>Subject Name</th>
+                        <th>Hours</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.TotalSubjects; i++)
+                    {
+                        <tr>
+                            <td>
+                                <input type="text" class="form-control" name="SubjectHours[@i].SubjectName"
+                                       placeholder="Enter subject name"
+                                       value="@(Model.SubjectHours.Count > i ? Model.SubjectHours[i].SubjectName : "")"
+                                       required />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control hoursInput" name="SubjectHours[@i].Hours"
+                                       placeholder="Enter hours" min="1" step="1"
+                                       value="@(Model.SubjectHours.Count > i ? Model.SubjectHours[i].Hours.ToString() : "")"
+                                       required />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div id="totalHoursError" class="alert alert-danger text-center d-none"></div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success btn-lg">Submit <i class="fas fa-check"></i></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".hoursInput").forEach(input => {
+        input.addEventListener("input", function () {
+            let validValue = this.value.replace(/[^0-9]/g, ''); 
+            if (this.value !== validValue) {
+                this.value = validValue; // Keep only the valid numeric part
+            }
+        });
+    });
+
+
+
+        // JavaScript Validation for Total Hours
+        document.getElementById("subjectHoursForm").addEventListener("submit", function (event) {
+            let totalRequiredHours = @Model.TotalHours;  // Total hours calculated
+            let totalEnteredHours = 0;
+            let hoursInputs = document.querySelectorAll(".hoursInput");
+
+            hoursInputs.forEach(input => {
+                totalEnteredHours += parseInt(input.value) || 0;
+            });
+
+            let errorDiv = document.getElementById("totalHoursError");
+            if (totalEnteredHours !== totalRequiredHours) {
+                event.preventDefault(); 
+                errorDiv.textContent = `Total hours of subjects must match the calculated total hours (${totalRequiredHours}).`;
+                errorDiv.classList.remove("d-none");
+            } else {
+                errorDiv.classList.add("d-none");
+            }
+        });
+    });
+</script>

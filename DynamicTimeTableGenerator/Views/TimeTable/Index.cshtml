@@ -1,0 +1,99 @@
+﻿@model DynamicTimeTableGenerator.Model.TimeTable.TimeTableModel
+
+@{
+    ViewData["Title"] = "Enter Time Table Details";
+}
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center text-primary mb-4">Enter Time Table Details</h2>
+        <!-- Show Error Message if Redirected -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger text-center">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <!-- Validation Summary (Displays All Errors at the Top) -->
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <form asp-action="Index" method="post">
+            <!-- Working Days Input -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">No of Working Days:</label>
+                <input type="number" class="form-control" asp-for="WorkingDays"
+                       id="workingDays" placeholder="Enter working days (1-7)"
+                       min="1" max="7" step="1" required />
+                <span  asp-validation-for="WorkingDays"></span>
+            </div>
+
+            <!-- Subjects Per Day Input -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">No of Subjects per Day:</label>
+                <input type="number" class="form-control" asp-for="SubjectsPerDay"
+                       id="subjectsPerDay" placeholder="Enter subjects per day (max 8)"
+                       min="1" max="8" step="1" required />
+                 
+                <span asp-validation-for="SubjectsPerDay"></span>
+            </div>
+
+            <!-- Total Subjects Input -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Total Subjects:</label>
+                <input type="number" class="form-control" asp-for="TotalSubjects"
+                       id="totalSubjects" placeholder="Enter total subjects"
+                       min="1" step="1" required />
+                <span asp-validation-for="TotalSubjects"></span>
+            </div>
+
+            <!-- Total Hours Display -->
+            <div class="alert alert-info text-center">
+                <p class="m-0"><strong>Total Hours for Week:</strong> <span id="totalHours" class="fw-bold">0</span></p>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg">Next <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FontAwesome for Icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<!-- JavaScript to Auto Update Total Hours & Prevent Decimal Input -->
+<script>
+    function updateTotalHours() {
+        let workingDays = parseInt(document.getElementById("workingDays").value) || 0;
+        let subjectsPerDay = parseInt(document.getElementById("subjectsPerDay").value) || 0;
+        let totalHours = workingDays * subjectsPerDay;
+        document.getElementById("totalHours").innerText = totalHours; // Update total hours dynamically
+    }
+
+    // Attach event listeners to input fields
+    document.getElementById("workingDays").addEventListener("input", updateTotalHours);
+    document.getElementById("subjectsPerDay").addEventListener("input", updateTotalHours);
+
+    // Prevent decimal input in number fields
+       document.querySelectorAll('input[type="number"]').forEach(input => {
+        input.addEventListener('input', function () {
+            let validValue = this.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+            if (this.value !== validValue) {
+                this.value = validValue; // Set only the valid numeric part
+            }
+        });
+    });
+
+    // Clear fields on page load
+    window.onload = function() {
+        document.getElementById("workingDays").value = "";
+        document.getElementById("subjectsPerDay").value = "";
+        document.getElementById("totalSubjects").value = "";
+        document.getElementById("totalHours").innerText = "0"; // Reset total hours
+    };
+</script>
